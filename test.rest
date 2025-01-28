@@ -1,0 +1,142 @@
+### Create a New Project
+POST http://98.130.44.68/projects/
+Content-Type: application/json
+
+{
+  "name": "test",
+  "description": "test"
+}
+
+###
+
+### List all Projects
+GET http://98.130.44.68/projects/
+
+###
+
+### Check Project Status
+GET http://98.130.44.68/projects/07c456ae-eec4-4836-aa51-3f7b6868dd3b/status
+
+###
+
+### Process Uploaded File
+POST http://98.130.44.68/projects/07c456ae-eec4-4836-aa51-3f7b6868dd3b/files/upload
+Content-Type: multipart/form-data
+
+file=@data.csv
+
+###
+
+### Check Task Status
+GET http://98.130.44.68/projects/tasks/f8f67f80-825f-4120-8c01-31197cdb87d9/status
+
+###
+
+### Validate Dataset
+POST http://98.130.44.68/projects/07c456ae-eec4-4836-aa51-3f7b6868dd3b/dataset/validate
+
+###
+
+### List Columns
+POST http://98.130.44.68/projects/07c456ae-eec4-4836-aa51-3f7b6868dd3b/dataset/columns
+
+###
+
+### Drop Columns
+POST http://98.130.44.68/projects/07c456ae-eec4-4836-aa51-3f7b6868dd3b/dataset/columns/drop
+Content-Type: application/json
+
+{
+  "column": ["Line Item"]
+}
+
+###
+
+### Feature Ranking
+POST http://98.130.44.68/projects/07c456ae-eec4-4836-aa51-3f7b6868dd3b/features/ranking
+Content-Type: application/json
+
+{
+  "kpi_list": ["kpi1", "kpi2"],
+  "important_features": ["var1", "var2"],
+  "kpi": "kpi"
+}
+
+###
+
+### Clustering
+POST http://98.130.44.68/projects/07c456ae-eec4-4836-aa51-3f7b6868dd3b/clusters/subcluster
+Content-Type: application/json
+
+{
+  "kpi": "kpi",
+  "level": 0,
+  "path": []
+}
+
+###
+
+### Summarize Clusters
+POST http://98.130.44.68/projects/07c456ae-eec4-4836-aa51-3f7b6868dd3b/clusters/summarize
+Content-Type: application/json
+
+{
+  "level": 0,
+  "path": []
+}
+
+###
+
+### Download Cluster Data
+POST http://98.130.44.68/projects/07c456ae-eec4-4836-aa51-3f7b6868dd3b/clusters/download
+Content-Type: application/json
+
+{
+  "level": 2,
+  "path": [1, 2]
+}
+
+###
+
+### Time Series Graph
+POST  /projects/07c456ae-eec4-4836-aa51-3f7b6868dd3b/time-series/analysis
+Content-Type: application/json
+
+{
+  "user_added_vars_list": ["var1", "var2"],
+  "level": 2,
+  "path": [0, 1],
+  "kpi": "sales",
+  "no_of_months": 6,
+  "date_column": "date",
+  "increase_factor": 1.2,
+  "zero_value_replacement": 0
+}
+
+###
+
+### Time Series: Get Encoded Columns
+POST http://98.130.44.68/projects/07c456ae-eec4-4836-aa51-3f7b6868dd3b/time-series/encoded-columns
+Content-Type: application/json
+
+{
+  "level": 1,
+  "path": [1],
+  "column_name": "Material"
+}
+
+###
+
+### Time Series: Get Categorical Columns
+POST http://98.130.44.68/projects/07c456ae-eec4-4836-aa51-3f7b6868dd3b/time-series/categorical-columns
+Content-Type: application/json
+
+{
+  "level": 1,
+  "path": [1]
+}
+
+###
+
+### Get Running Tasks
+GET http://98.130.44.68/projects/tasks/running
