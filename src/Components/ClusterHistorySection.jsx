@@ -26,9 +26,9 @@ const ClusterHistorySection = ({ selectedCell, currentLevel, handleHistoryClick 
             className="mb-4 p-3 bg-indigo-50 rounded-lg shadow-sm"
           >
             <h4 className="font-medium text-indigo-800 mb-2">Current Selection:</h4>
-            <p className="text-sm text-gray-700">Segment: {selectedCell.clusterIndex + 1}</p>
+            <p className="text-sm text-gray-700">Level: {currentLevel + 1}</p>
             <p className="text-sm text-gray-700">Parameter: {selectedCell.feature}</p>
-            <p className="text-sm text-gray-700">Level: {currentLevel}</p>
+            <p className="text-sm text-gray-700">Segment: {selectedCell.clusterIndex + 1}</p>
           </motion.div>
         )}
 
@@ -37,27 +37,25 @@ const ClusterHistorySection = ({ selectedCell, currentLevel, handleHistoryClick 
             <motion.div
               key={index}
               onClick={() => handleClick(item, index)}
-              className={`p-3 rounded-lg cursor-pointer transition-colors shadow-sm ${
-                index === selectedIndex ? "bg-indigo-100 border-l-4 border-indigo-500" : "bg-white hover:bg-gray-200"
-              }`}
+              className={`p-3 rounded-lg cursor-pointer transition-colors shadow-sm ${index === selectedIndex ? "bg-indigo-100 border-l-4 border-indigo-500" : "bg-white hover:bg-gray-200"
+                }`}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-center gap-2">
                 <ChevronRight
-                  className={`w-4 h-4 flex-shrink-0 ${
-                    item.level === currentLevel ? "text-indigo-700" : "text-indigo-500"
-                  }`}
+                  className={`w-4 h-4 flex-shrink-0 ${item.level === currentLevel ? "text-indigo-700" : "text-indigo-500"
+                    }`}
                 />
                 <div>
                   <p className={`font-medium ${item.level === currentLevel ? "text-indigo-800" : "text-gray-800"}`}>
                     Segment {item.cluster}
                   </p>
                   <p className={`text-sm ${item.level === currentLevel ? "text-indigo-600" : "text-gray-600"}`}>
-                    Parameter: {item.feature}
+                    Level: {item.level + 1}
                   </p>
                   <p className={`text-sm ${item.level === currentLevel ? "text-indigo-600" : "text-gray-600"}`}>
-                    Level: {item.level}
+                    Parameter: {item.feature}
                   </p>
                 </div>
               </div>

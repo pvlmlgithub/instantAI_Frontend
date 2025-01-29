@@ -19,16 +19,6 @@ const ClusterDropdown = ({ groupedClusters, feature, clusterIndex }) => {
           {groupedClusters.lowest[feature]?.[clusterIndex]?.original.Value ||
             "N/A"}
         </p>
-        <p>
-          <strong>Mean Value:</strong>{" "}
-          {groupedClusters.Mean[feature]?.[clusterIndex]?.original.Value ||
-            "N/A"}
-        </p>
-        <p>
-          <strong>Mean Value:</strong>{" "}
-          {groupedClusters.Mean[feature]?.[clusterIndex]?.original.Value ||
-            "N/A"}
-        </p>
       </div>
     </div>
   );

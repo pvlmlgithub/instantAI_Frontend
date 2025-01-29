@@ -11,6 +11,8 @@ import { featureRanking } from "../utils/apiUtils"
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux"
 import { setClusterHistory, setSelectedIndex } from "../redux/clusterSlice"
+import DefinationModel from "../Components/DefinationModel"
+import SelectableClusterPopup from "../Components/SelectableClustorPopup"
 
 const ClusteringComponent = () => {
   const navigate = useNavigate()
@@ -34,6 +36,11 @@ const ClusteringComponent = () => {
   const workbenchRef = useRef(null);
   const dispatch = useDispatch()
   const { clusterHistory, selectedIndex } = useSelector((state) => state.cluster)
+  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen1, setIsOpen1] = useState(false)
+  const [selectedCluster, setSelectedCluster] = useState(2) // Default to cluster 2
+
+
 
 
   const toggleDropdown = (e, feature, clusterIndex) => {
@@ -298,7 +305,7 @@ const ClusteringComponent = () => {
                       <tr>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10"
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 "
                         >
                           Segments/Parameters
                         </th>
@@ -308,8 +315,8 @@ const ClusteringComponent = () => {
                             scope="col"
                             className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                           >
-                            <div className="flex items-center justify-start min-w-[120px] max-w-[120px]">
-                              <span>Segment {index + 1}</span>
+                            <div className="flex items-center justify-start min-w-[120px] max-w-[120px] cursor-pointer">
+                              <span onDoubleClick={() => setIsOpen(true)}>Segment {index + 1}</span>
                               <button
                                 className="ml-2 p-1 rounded-full hover:bg-gray-200 transition-colors"
                                 onClick={(e) => {
@@ -361,6 +368,51 @@ const ClusteringComponent = () => {
                                   clusterIndex={clusterIndex}
                                 />
                               )}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                      {filterImportantFeatures(Object.keys(groupedClusters.mean)).map((feature) => (
+                        <tr key={feature} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white">
+                            {feature}
+                          </td>
+                          {extractedClusters.map((_, clusterIndex) => (
+                            <td
+                              key={clusterIndex}
+                              className={`px-6 py-4 whitespace-nowrap text-sm ${selectedCell?.feature === feature && selectedCell?.clusterIndex === clusterIndex
+                                ? "bg-indigo-100"
+                                : ""
+                                }`}
+                              onClick={() => handleCellClick(feature, clusterIndex)}
+                              onDoubleClick={() => {
+                                setIsOpen1(true)
+                                setSelectedCluster(clusterIndex + 1)
+                              }
+                              }
+                            >
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toggleDropdown(e, feature, clusterIndex)
+                                }}
+                                className="cursor-pointer hover:bg-indigo-50 p-2 rounded transition-colors"
+                              >
+                                {(groupedClusters.top1?.[feature]?.[clusterIndex]?.original?.Mean?.toFixed(4)) ??
+                                  groupedClusters.mean?.[feature]?.[clusterIndex]?.original?.Mean?.toFixed(4) ??
+                                  0}
+                                <span className="ml-2 text-sm text-gray-500">
+                                  ({groupedClusters.mean[feature][clusterIndex]?.original.Count || 0})
+                                </span>
+                              </div>
+                              {/* {openDropdowns[`${feature}-${clusterIndex}`] && (
+                                <ClusterDropdown
+                                  groupedClusters={groupedClusters}
+                                  feature={feature}
+                                  toggleDropdown={toggleDropdown}
+                                  clusterIndex={clusterIndex}
+                                />
+                              )} */}
                             </td>
                           ))}
                         </tr>
@@ -445,18 +497,30 @@ const ClusteringComponent = () => {
         </motion.div>
         )}
       </div>
-      {showModal && (
-        <WorkbenchModal
-          categorical_columns={categoricalColumns}
-          currentLevel={currentLevel}
-          currentPath={currentPath}
-          activeKPI={newkpi}
-          showModal={showModal}
-          setShowModal={setShowModal}
-          project_id={project_id}
-        />
-      )}
-    </div>
+      {
+        showModal && (
+          <WorkbenchModal
+            categorical_columns={categoricalColumns}
+            currentLevel={currentLevel}
+            currentPath={currentPath}
+            activeKPI={newkpi}
+            showModal={showModal}
+            setShowModal={setShowModal}
+            project_id={project_id}
+          />
+        )
+      }
+      {
+        isOpen && (
+          <DefinationModel setIsOpen={setIsOpen} />
+        )
+      }
+      {
+        isOpen1 && (
+          <SelectableClusterPopup setIsOpen1={setIsOpen1} selectedCluster={selectedCluster} setSelectedCluster={setSelectedCluster} clustorLength={extractedClusters?.length} />
+        )
+      }
+    </div >
   )
 }
 
