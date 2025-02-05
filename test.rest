@@ -136,6 +136,16 @@ Content-Type: application/json
   "path": [1]
 }
 
+
+### Clustering Defination
+POST http://98.130.44.68/projects/f90e7cde-e6fc-40b9-9f07-4d9ecc2dcede/clusters/defination
+
+{
+  "path": [1],
+  "kpi":"revenue",
+  "cluster_no": 1
+}
+
 ###
 
 ### Get Running Tasks
