@@ -47,7 +47,7 @@ const SelectKPI = () => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-[calc(100vh-64px)] overflow-hidden ">
       <div className="w-64 bg-gray-100 border-r border-gray-200 overflow-y-auto p-4">
         <h2 className="text-lg font-semibold mb-4 text-gray-800">Segment History</h2>
         <p className=" text-gray-600 flex items-center w-full">No history</p>

@@ -57,6 +57,7 @@ const UploadCom = () => {
       sessionStorage.setItem("task_id", task_id)
       setStatusMessage("File uploaded successfully!")
       setUploadSuccess(true)
+      handleValidate() // Automatically trigger validation after successful upload
     } catch (error) {
       console.error("Error uploading file:", error)
       setStatusMessage("Error uploading file. Please try again.")
@@ -116,9 +117,8 @@ const UploadCom = () => {
             <motion.button
               type="submit"
               disabled={isLoading}
-              className={`w-full sm:w-auto px-4 py-2 text-white rounded-md ${
-                isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-black hover:bg-gray-800"
-              }`}
+              className={`w-full sm:w-auto px-4 py-2 text-white rounded-md ${isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-black hover:bg-gray-800"
+                }`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -138,7 +138,7 @@ const UploadCom = () => {
             )}
           </AnimatePresence>
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-start sm:items-center">
-            <motion.button
+            {/* <motion.button
               type="button"
               onClick={handleValidate}
               disabled={!uploadSuccess || isValidating}
@@ -149,8 +149,8 @@ const UploadCom = () => {
               whileTap={{ scale: 0.95 }}
             >
               {isValidating ? "Validating..." : "Validate"}
-            </motion.button>
-            {statusMessage && (
+            </motion.button> */}
+            {/* {statusMessage && (
               <motion.button
                 type="button"
                 onClick={toggleSettings}
@@ -160,7 +160,7 @@ const UploadCom = () => {
               >
                 {isSettingsOpen ? "Close Settings" : "Open Settings"}
               </motion.button>
-            )}
+            )} */}
           </div>
           <AnimatePresence>
             {statusMessage && (
@@ -171,11 +171,10 @@ const UploadCom = () => {
                 className="mt-4 text-sm text-gray-700"
               >
                 <div
-                  className={`border-l-4 p-4 mb-4 ${
-                    uploadSuccess
+                  className={`border-l-4 p-4 mb-4 ${uploadSuccess
                       ? "bg-green-100 border-green-500 text-green-700"
                       : "bg-red-100 border-red-500 text-red-700"
-                  }`}
+                    }`}
                   role="alert"
                 >
                   <div className="flex items-center">
@@ -202,7 +201,20 @@ const UploadCom = () => {
               exit={{ opacity: 0, height: 0 }}
               className="bg-gray-100 rounded-lg p-4"
             >
-              <h2 className="text-xl sm:text-2xl font-bold mb-4">Dataset Settings</h2>
+              <div className="flex justify-between">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">Dataset Settings</h2>
+                {statusMessage && (
+                  <motion.button
+                    type="button"
+                    onClick={toggleSettings}
+                    className="w-full sm:w-auto px-4 py-2 text-white rounded-md bg-blue-500 hover:bg-blue-600"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {isSettingsOpen ? "Close Settings" : "Open Settings"}
+                  </motion.button>
+                )}
+              </div>
               <div>
                 <p className="mt-2 text-sm text-gray-600">{validateMessage}</p>
                 <SelectColumns />
@@ -216,4 +228,3 @@ const UploadCom = () => {
 }
 
 export default UploadCom
-

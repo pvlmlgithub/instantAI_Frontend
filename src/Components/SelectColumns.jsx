@@ -147,7 +147,6 @@ const SelectColumns = () => {
             </div>
           )}
 
-          {/* Column Drop Section */}
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Select Columns to Drop</label>
@@ -160,7 +159,6 @@ const SelectColumns = () => {
                     closeMenuOnSelect={false}
                     isMulti={true}
                     placeholder="Select columns to drop"
-                    components={{ Option: CustomOption }}
                     className="react-select-container"
                     classNamePrefix="react-select"
                   />
@@ -168,30 +166,32 @@ const SelectColumns = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`px-4 py-2 bg-red-500 text-white rounded-md flex items-center justify-center gap-2 transition duration-300 ease-in-out ${
-                    droppedColumns.length === 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-red-600"
-                  }`}
+                  className={`px-4 py-2 bg-red-500 text-white rounded-md flex items-center justify-center gap-2 transition duration-300 ease-in-out ${droppedColumns.length === 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-red-600"
+                    }`}
                   onClick={handleDrop}
                   disabled={droppedColumns.length === 0}
                 >
-                  Drop <Trash2 size={18} />
+                  Drop
                 </motion.button>
               </div>
             </div>
 
-            {/* KPI and Important Column Selection */}
             {success && (
               <>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Select KPI Columns</label>
                   <Select
                     value={selectedKpi}
-                    onChange={setSelectedKpi}
+                    onChange={(selected) => {
+                      const uniqueSelected = selected.filter(
+                        (item, index, self) => index === self.findIndex((t) => t.value === item.value),
+                      )
+                      setSelectedKpi(uniqueSelected)
+                    }}
                     options={options}
                     closeMenuOnSelect={false}
                     isMulti={true}
                     placeholder="Select KPI columns"
-                    components={{ Option: CustomOption }}
                     className="react-select-container"
                     classNamePrefix="react-select"
                   />
@@ -201,12 +201,16 @@ const SelectColumns = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Select Important Columns</label>
                   <Select
                     value={selectedImportant}
-                    onChange={setSelectedImportant}
+                    onChange={(selected) => {
+                      const uniqueSelected = selected.filter(
+                        (item, index, self) => index === self.findIndex((t) => t.value === item.value),
+                      )
+                      setSelectedImportant(uniqueSelected)
+                    }}
                     options={options}
                     isMulti={true}
                     closeMenuOnSelect={false}
                     placeholder="Select important columns"
-                    components={{ Option: CustomOption }}
                     className="react-select-container"
                     classNamePrefix="react-select"
                   />
@@ -214,6 +218,7 @@ const SelectColumns = () => {
               </>
             )}
           </div>
+
 
           {errors.submit && (
             <div className="flex items-center gap-2 text-red-600 mt-4">
@@ -227,6 +232,7 @@ const SelectColumns = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleSubmit}
+              disabled={!success}
               className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition duration-300 ease-in-out flex items-center gap-2"
               type="button"
             >

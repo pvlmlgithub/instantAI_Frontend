@@ -40,8 +40,11 @@ const ClusteringComponent = () => {
   const [isOpen1, setIsOpen1] = useState(false)
   const [selectedCluster, setSelectedCluster] = useState(2) // Default to cluster 2
 
-
-
+  useEffect(() => {
+    if (clusterHistory.length === 0 && selectedIndex === -1) {
+      dispatch(setClusterHistory([]));
+    }
+  }, []);
 
   const toggleDropdown = (e, feature, clusterIndex) => {
     e.stopPropagation()
@@ -178,6 +181,7 @@ const ClusteringComponent = () => {
     setCurrentPath([]);
     setNewkpi(kpi); // Update the newkpi state
     setSelectedCell(null);
+    dispatch(setClusterHistory([]));
 
     // Update the active KPI in the local state
 
@@ -267,6 +271,8 @@ const ClusteringComponent = () => {
       }
     }
   }, [baseUrl, project_id])
+
+
 
   return (
     <div className="flex h-[calc(100vh-80px)] overflow-hidden overflow-y-auto ">
@@ -512,7 +518,7 @@ const ClusteringComponent = () => {
       }
       {
         isOpen && (
-          <DefinationModel setIsOpen={setIsOpen} />
+          <DefinationModel setIsOpen={setIsOpen} kpi={newkpi}/>
         )
       }
       {
