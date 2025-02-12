@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react"
 import axios from "axios"
-import _ from "lodash"
+import _, { set } from "lodash"
 import Loader from "../Components/Loader"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { ArrowBigDownDash, Command } from "lucide-react"
@@ -38,13 +38,19 @@ const ClusteringComponent = () => {
   const { clusterHistory, selectedIndex } = useSelector((state) => state.cluster)
   const [isOpen, setIsOpen] = useState(false)
   const [isOpen1, setIsOpen1] = useState(false)
-  const [selectedCluster, setSelectedCluster] = useState(2) // Default to cluster 2
+  const [selectedCluster, setSelectedCluster] = useState(0) // Default to cluster 2
 
   useEffect(() => {
     if (clusterHistory.length === 0 && selectedIndex === -1) {
       dispatch(setClusterHistory([]));
     }
   }, []);
+
+  useEffect(() => {
+    if (clusterHistory.length > 0) {
+      setCurrentLevel(clusterHistory[clusterHistory?.length - 1].level + 1)
+    }
+  }, [clusterHistory]);
 
   const toggleDropdown = (e, feature, clusterIndex) => {
     e.stopPropagation()
@@ -182,7 +188,6 @@ const ClusteringComponent = () => {
     setNewkpi(kpi); // Update the newkpi state
     setSelectedCell(null);
     dispatch(setClusterHistory([]));
-
     // Update the active KPI in the local state
 
     const task_id = await featureRanking(project_id, kpi, importantColumnNames, kpiList);
@@ -190,8 +195,8 @@ const ClusteringComponent = () => {
   };
 
 
-  const handleCellClick = (feature, clusterIndex) => {
-    setSelectedCell({ feature, clusterIndex, currentLevel })
+  const handleCellClick = (feature, clusterIndex, value) => {
+    setSelectedCell({ feature, clusterIndex, currentLevel, value })
     setOpenDropdowns({})
   }
 
@@ -201,6 +206,7 @@ const ClusteringComponent = () => {
       const newHistoryItem = {
         cluster: selectedCell.clusterIndex + 1,
         feature: selectedCell.feature,
+        value: selectedCell.value,
         level: currentLevel,
         extractedClusters: extractedClusters,
         path: currentPath,
@@ -322,7 +328,10 @@ const ClusteringComponent = () => {
                             className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                           >
                             <div className="flex items-center justify-start min-w-[120px] max-w-[120px] cursor-pointer">
-                              <span onDoubleClick={() => setIsOpen(true)}>Segment {index + 1}</span>
+                              <span onDoubleClick={() => {
+                                setIsOpen(true)
+                                setSelectedCluster(index + 1)
+                              }}>Segment {index + 1}</span>
                               <button
                                 className="ml-2 p-1 rounded-full hover:bg-gray-200 transition-colors"
                                 onClick={(e) => {
@@ -350,26 +359,29 @@ const ClusteringComponent = () => {
                                 ? "bg-indigo-100"
                                 : ""
                                 }`}
-                              onClick={() => handleCellClick(feature, clusterIndex)}
+
                             >
                               <div
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  toggleDropdown(e, feature, clusterIndex)
-                                }}
-                                className="cursor-pointer hover:bg-indigo-50 p-2 rounded transition-colors"
+                                onClick={() => handleCellClick(feature, clusterIndex, groupedClusters.top1?.[feature]?.[clusterIndex]?.original?.Value ??
+                                  groupedClusters.mean?.[feature]?.[clusterIndex]?.original?.Mean ??
+                                  0)}
+                                className="cursor-pointer hover:bg-indigo-50 p-2 rounded transition-colors hover:underline"
                               >
                                 {groupedClusters.top1?.[feature]?.[clusterIndex]?.original?.Value ??
                                   groupedClusters.mean?.[feature]?.[clusterIndex]?.original?.Mean ??
                                   0}
-                                <span className="ml-2 text-sm text-gray-500">
-                                  ({groupedClusters.top1[feature][clusterIndex]?.original.Count || 0}) ▼
+                                <span className="ml-2 text-sm text-gray-500"  >
+                                  - {groupedClusters.top1[feature][clusterIndex]?.original.Percentage || 0} <span className="pl-4" onClick={(e) => {
+                                    e.stopPropagation()
+                                    toggleDropdown(e, feature, clusterIndex)
+                                  }}>▼</span>
                                 </span>
                               </div>
                               {openDropdowns[`${feature}-${clusterIndex}`] && (
                                 <ClusterDropdown
                                   groupedClusters={groupedClusters}
                                   feature={feature}
+                                  handleCellClick={handleCellClick}
                                   toggleDropdown={toggleDropdown}
                                   clusterIndex={clusterIndex}
                                 />
@@ -390,7 +402,9 @@ const ClusteringComponent = () => {
                                 ? "bg-indigo-100"
                                 : ""
                                 }`}
-                              onClick={() => handleCellClick(feature, clusterIndex)}
+                              onClick={() => handleCellClick(feature, clusterIndex, groupedClusters.top1?.[feature]?.[clusterIndex]?.original?.Value ??
+                                groupedClusters.mean?.[feature]?.[clusterIndex]?.original?.Mean ??
+                                0)}
                               onDoubleClick={() => {
                                 setIsOpen1(true)
                                 setSelectedCluster(clusterIndex + 1)
@@ -446,12 +460,7 @@ const ClusteringComponent = () => {
                 Workbench
               </button> */}
               <button
-                onClick={() => {
-                  setActionIt(!actionIt)
-                  if (workbenchRef.current) {
-                    workbenchRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }
-                }}
+                onClick={() => navigate(`/projects/${project_id}/workbench`, { state: { activeKPI: newkpi, kpiList, task_id, importantColumnNames } })}
                 className="p-2 rounded-lg font-semibold border px-4 bg-white text-gray-800 hover:bg-gray-100 transition-colors"
               >
                 Workbench
@@ -518,12 +527,12 @@ const ClusteringComponent = () => {
       }
       {
         isOpen && (
-          <DefinationModel setIsOpen={setIsOpen} kpi={newkpi}/>
+          <DefinationModel setIsOpen={setIsOpen} kpi={newkpi} clusterNo={selectedCluster} path={currentPath} />
         )
       }
       {
         isOpen1 && (
-          <SelectableClusterPopup setIsOpen1={setIsOpen1} selectedCluster={selectedCluster} setSelectedCluster={setSelectedCluster} clustorLength={extractedClusters?.length} />
+          <SelectableClusterPopup setIsOpen1={setIsOpen1} selectedCluster={selectedCluster} setSelectedCluster={setSelectedCluster} kpi={newkpi} />
         )
       }
     </div >

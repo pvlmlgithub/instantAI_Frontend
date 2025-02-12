@@ -28,6 +28,7 @@ const ClusterHistorySection = ({ selectedCell, currentLevel, handleHistoryClick 
             <h4 className="font-medium text-indigo-800 mb-2">Current Selection:</h4>
             <p className="text-sm text-gray-700">Level: {currentLevel + 1}</p>
             <p className="text-sm text-gray-700">Parameter: {selectedCell.feature}</p>
+            <p className="text-sm text-gray-700">Value: {typeof selectedCell.value === "number" ? selectedCell.value.toFixed(4) : selectedCell.value}</p>
             <p className="text-sm text-gray-700">Segment: {selectedCell.clusterIndex + 1}</p>
           </motion.div>
         )}
@@ -52,11 +53,15 @@ const ClusterHistorySection = ({ selectedCell, currentLevel, handleHistoryClick 
                     Segment {item.cluster}
                   </p>
                   <p className={`text-sm ${item.level === currentLevel ? "text-indigo-600" : "text-gray-600"}`}>
+                    Value: {typeof item.value === "number" ? Number(item.value).toFixed(4) : item.value}
+                  </p>
+                  <p className={`text-sm ${item.level === currentLevel ? "text-indigo-600" : "text-gray-600"}`}>
                     Level: {item.level + 1}
                   </p>
                   <p className={`text-sm ${item.level === currentLevel ? "text-indigo-600" : "text-gray-600"}`}>
                     Parameter: {item.feature}
                   </p>
+                 
                 </div>
               </div>
             </motion.div>

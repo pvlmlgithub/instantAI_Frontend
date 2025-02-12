@@ -143,8 +143,8 @@ Content-Type: application/json
 
 {
   "path": [],
-  "kpi":"Revenue",
-  "cluster_no": 0
+  "kpi":"Basic Sale Price",
+  "cluster_no": 5
 }
 
 ### Feature Weight Ranking
@@ -166,6 +166,15 @@ Content-Type: application/json
 }
 
 ###
+
+### Time Series: Get Encoded Columns
+POST http://98.130.44.68/projects/f90e7cde-e6fc-40b9-9f07-4d9ecc2dcede/time-series/encoded-columns
+Content-Type: application/json
+
+{
+  "path": [0],
+  "column_name": "Frieght Charged"
+}
 
 ### Get Running Tasks
 GET http://98.130.44.68/projects/tasks/running

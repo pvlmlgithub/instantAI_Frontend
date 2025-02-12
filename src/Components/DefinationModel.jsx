@@ -2,7 +2,7 @@ import React from 'react'
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-const DefinationModel = ({ setIsOpen, kpi }) => {
+const DefinationModel = ({ setIsOpen, kpi, clusterNo, path }) => {
 
     const baseUrl = 'http://98.130.44.68';
     const [data, setData] = useState([]);
@@ -31,17 +31,14 @@ const DefinationModel = ({ setIsOpen, kpi }) => {
 
     const fetchData = async () => {
         try {
-            const response = await axios.post(`${baseUrl}/projects/f90e7cde-e6fc-40b9-9f07-4d9ecc2dcede/features/weight`, {
-                path: [],
-                kpi: kpi
+            const response = await axios.post(`${baseUrl}/projects/f90e7cde-e6fc-40b9-9f07-4d9ecc2dcede/clusters/defination`, {
+                path: path,
+                kpi: kpi,
+                cluster_no: clusterNo
             });
-            const task_id2 = response.data.task_id;
-            // await checkSubclusterStatus(task_id2);
-            const result = await axios.post(`${baseUrl}/projects/f90e7cde-e6fc-40b9-9f07-4d9ecc2dcede/features/weight/result`, {
-                path: [],
-                kpi: kpi
-            });
-            return result.data;
+            response.data.sort((a, b) => b.abs_z_score - a.abs_z_score);
+            response.data = response.data.slice(0, 5);
+            return response.data;
         } catch (error) {
             console.error("Error fetching data:", error);
         }
@@ -82,8 +79,8 @@ const DefinationModel = ({ setIsOpen, kpi }) => {
                         <tbody>
                             {data?.map((row, index) => (
                                 <tr key={index} className="border-b last:border-b-0 hover:bg-gray-50">
-                                    <td className="py-2 px-4 text-gray-800 border-r-2">{row.Feature}</td>
-                                    <td className="py-2 px-4 text-gray-800 text-center">{row.Impact_Score.toFixed(3)}</td>
+                                    <td className="py-2 px-4 text-gray-800 border-r-2">{row.feature}</td>
+                                    <td className="py-2 px-4 text-gray-800 text-center">{row.abs_z_score.toFixed(3)}</td>
                                 </tr>
                             ))}
                         </tbody>

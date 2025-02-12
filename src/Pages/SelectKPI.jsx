@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { featureRanking } from "../utils/apiUtils";
 import Loader from "../Components/Loader";
+import { useDispatch } from "react-redux";
+import { setClusterHistory } from "../redux/clusterSlice";
 
 const SelectKPI = () => {
   const location = useLocation();
@@ -12,6 +14,7 @@ const SelectKPI = () => {
   const { importantColumnNames, kpiList } = location.state;
   const [activeKPI, setActiveKPI] = useState("");
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   console.log(kpiList);
   console.log(importantColumnNames);
@@ -45,6 +48,10 @@ const SelectKPI = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    dispatch(setClusterHistory([]));
+  }, []);
 
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden ">
