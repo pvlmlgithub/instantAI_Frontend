@@ -6,10 +6,20 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {}
-  }, resolve: {
+  }, 
+  resolve: {
     alias: {
       '@': '/src', // Ensure this alias is correctly pointing to 'src'
-      
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1000, 
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom']
+        }
+      }
+    }
+  }
 })

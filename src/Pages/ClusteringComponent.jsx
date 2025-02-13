@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
 import axios from "axios"
-import _, { set } from "lodash"
 import Loader from "../Components/Loader"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { ArrowBigDownDash, Command } from "lucide-react"
@@ -165,11 +164,17 @@ const ClusteringComponent = () => {
   }
 
   const groupClustersByStatistic = (statistic) => {
-    return _.groupBy(
-      allClusters.filter((cluster) => cluster.original.Statistic === statistic),
-      "original.Feature",
-    )
-  }
+    return allClusters
+      .filter((cluster) => cluster.original.Statistic === statistic)
+      .reduce((acc, cluster) => {
+        const feature = cluster.original.Feature;
+        if (!acc[feature]) {
+          acc[feature] = [];
+        }
+        acc[feature].push(cluster);
+        return acc;
+      }, {});
+  };
 
   const groupedClusters = {
     top1: groupClustersByStatistic("Top 1 Value"),

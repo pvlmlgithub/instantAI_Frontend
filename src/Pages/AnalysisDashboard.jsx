@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from "react"
-import { useLocation, useParams } from "react-router-dom"
-import axios from "axios"
-import _ from "lodash"
-import ClusterHistorySection from "../Components/ClusterHistorySection"
-import { featureRanking } from "../utils/apiUtils"
-import { ArrowDown, ChevronDown, ChevronDownIcon, Command } from "lucide-react"
-import ClusterDropdown from "../Components/ClusterDropdown"
-import WorkbenchModal from "../Components/WorkbenchModal"
+import React, { useState, useEffect } from "react";
+import { useLocation, useParams } from "react-router-dom";
+import axios from "axios";
+import ClusterHistorySection from "../Components/ClusterHistorySection";
+import { featureRanking } from "../utils/apiUtils";
+import { ArrowDown, ChevronDown, ChevronDownIcon, Command } from "lucide-react";
+import ClusterDropdown from "../Components/ClusterDropdown";
+import WorkbenchModal from "../Components/WorkbenchModal";
 
 export default function AnalysisDashboard() {
   const location = useLocation();
@@ -20,24 +19,25 @@ export default function AnalysisDashboard() {
   console.log(kpiList);
   console.log(importantColumnNames);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const task_id = await featureRanking(
+          project_id,
+          activeKPI,
+          importantColumnNames,
+          kpiList
+        );
+        setTask_id(task_id);
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  useEffect(async () => {
-    setLoading(true);
-    try {
-      const task_id = await featureRanking(
-        project_id,
-        activeKPI,
-        importantColumnNames,
-        kpiList,
-
-      );
-      setTask_id(task_id);
-
-    } catch (error) {
-      console.error("Error:", error);
-    } finally {
-      setLoading(false);
-    }
+    fetchData();
   }, []);
 
   const [newkpi, setNewkpi] = useState(activeKPI);
@@ -60,6 +60,7 @@ export default function AnalysisDashboard() {
       [`${feature}-${clusterIndex}`]: !prev[`${feature}-${clusterIndex}`],
     }));
   };
+
   const handleDownload = async (clusterIndex) => {
     try {
       const response = await axios.post(
@@ -190,15 +191,22 @@ export default function AnalysisDashboard() {
     }
   };
   console.log(extractedClusters);
+
   const filterImportantFeatures = (features) => {
     return features.filter((feature) => importantColumnNames.includes(feature));
   };
 
   const groupClustersByStatistic = (statistic) => {
-    return _.groupBy(
-      allClusters.filter((cluster) => cluster.original.Statistic === statistic),
-      "original.Feature"
-    );
+    return allClusters
+      .filter((cluster) => cluster.original.Statistic === statistic)
+      .reduce((acc, cluster) => {
+        const feature = cluster.original.Feature;
+        if (!acc[feature]) {
+          acc[feature] = [];
+        }
+        acc[feature].push(cluster);
+        return acc;
+      }, {});
   };
 
   const groupedClusters = {
@@ -277,15 +285,14 @@ export default function AnalysisDashboard() {
     }
   };
 
-
-
-
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>
+    return (
+      <div className="flex justify-center items-center h-screen">Loading...</div>
+    );
   }
 
   if (error) {
-    return <div className="text-red-500 text-center">{error}</div>
+    return <div className="text-red-500 text-center">{error}</div>;
   }
 
   return (
@@ -299,14 +306,16 @@ export default function AnalysisDashboard() {
         />
       </div>
       <div className="flex-1 overflow-auto p-6">
-
         <div className="flex flex-wrap gap-2 mb-8">
           {kpiList.map((kpi, index) => (
             <button
               key={index}
               onClick={() => handleKpiClick(kpi)}
-              className={`px-4 py-2 text-sm font-medium rounded-md min-w-[100px] ${activeKPI === kpi ? "text-white bg-purple-400" : "text-gray-600 bg-white hover:bg-gray-50"
-                }`}
+              className={`px-4 py-2 text-sm font-medium rounded-md min-w-[100px] ${
+                activeKPI === kpi
+                  ? "text-white bg-purple-400"
+                  : "text-gray-600 bg-white hover:bg-gray-50"
+              }`}
             >
               {kpi}
             </button>
@@ -323,13 +332,16 @@ export default function AnalysisDashboard() {
                   Parameters
                 </th>
                 {extractedClusters.map((_, index) => (
-                  <th key={index} className="border py-2 px-1 text-center whitespace-nowrap">
+                  <th
+                    key={index}
+                    className="border py-2 px-1 text-center whitespace-nowrap"
+                  >
                     Segment {index + 1}
                     <button
                       className="p-1 border border-white rounded-full ml-2 hover:bg-indigo-500 transition-colors"
                       onClick={(e) => {
-                        e.preventDefault()
-                        handleDownload(index)
+                        e.preventDefault();
+                        handleDownload(index);
                       }}
                     >
                       <ArrowDown className="h-4 w-4" />
@@ -339,55 +351,57 @@ export default function AnalysisDashboard() {
               </tr>
             </thead>
             <tbody>
-              {filterImportantFeatures(Object.keys(groupedClusters.top1)).map((feature) => (
-                <tr key={feature} className="hover:bg-gray-50  bg-white">
-                  <td className="border p-2 hover:text-white sticky z-40 bg-white -left-5">
-                    {feature}
-                  </td>
-                  {extractedClusters.map((_, clusterIndex) => (
-                    <td
-                      key={clusterIndex}
-                      className={`border py-1  hover:bg-indigo-400 cursor-pointer ${selectedCell?.feature === feature &&
-                        selectedCell?.clusterIndex === clusterIndex
-                        ? "bg-indigo-400 "
-                        : "bg-white text-black"
-                        }`}
-                      onClick={() => handleCellClick(feature, clusterIndex)}
-                    >
-                      <div
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleDropdown(e, feature, clusterIndex);
-                        }}
-                        className="cursor-pointer hover:bg-indigo-400 hover:text-white p-2 flex w-fll justify-between"
-                      >
-                        {groupedClusters.top1?.[feature]?.[clusterIndex]
-                          ?.original?.Value ??
-                          groupedClusters.mean?.[feature]?.[clusterIndex]
-                            ?.original?.Mean ??
-                          0}
-                        <br />
-
-                        <span className="ml-2 text-sm text-gray-500 hover:text-white flex">
-                          {" "}
-                          (
-                          {groupedClusters.top1[feature][clusterIndex]
-                            ?.original.Count || 0}
-                          ) ▼
-                        </span>
-                      </div>
-                      {openDropdowns[`${feature}-${clusterIndex}`] && (
-                        <ClusterDropdown
-                          groupedClusters={groupedClusters}
-                          feature={feature}
-                          toggleDropdown={toggleDropdown}
-                          clusterIndex={clusterIndex}
-                        />
-                      )}
+              {filterImportantFeatures(Object.keys(groupedClusters.top1)).map(
+                (feature) => (
+                  <tr key={feature} className="hover:bg-gray-50  bg-white">
+                    <td className="border p-2 hover:text-white sticky z-40 bg-white -left-5">
+                      {feature}
                     </td>
-                  ))}
-                </tr>
-              ))}
+                    {extractedClusters.map((_, clusterIndex) => (
+                      <td
+                        key={clusterIndex}
+                        className={`border py-1  hover:bg-indigo-400 cursor-pointer ${
+                          selectedCell?.feature === feature &&
+                          selectedCell?.clusterIndex === clusterIndex
+                            ? "bg-indigo-400 "
+                            : "bg-white text-black"
+                        }`}
+                        onClick={() => handleCellClick(feature, clusterIndex)}
+                      >
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleDropdown(e, feature, clusterIndex);
+                          }}
+                          className="cursor-pointer hover:bg-indigo-400 hover:text-white p-2 flex w-fll justify-between"
+                        >
+                          {groupedClusters.top1?.[feature]?.[clusterIndex]
+                            ?.original?.Value ??
+                            groupedClusters.mean?.[feature]?.[clusterIndex]
+                              ?.original?.Mean ?? 0}
+                          <br />
+
+                          <span className="ml-2 text-sm text-gray-500 hover:text-white flex">
+                            {" "}
+                            (
+                            {groupedClusters.top1[feature][clusterIndex]
+                              ?.original.Count || 0}
+                            ) ▼
+                          </span>
+                        </div>
+                        {openDropdowns[`${feature}-${clusterIndex}`] && (
+                          <ClusterDropdown
+                            groupedClusters={groupedClusters}
+                            feature={feature}
+                            toggleDropdown={toggleDropdown}
+                            clusterIndex={clusterIndex}
+                          />
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                )
+              )}
             </tbody>
           </table>
         </div>
@@ -396,10 +410,12 @@ export default function AnalysisDashboard() {
           <button
             onClick={handleAnalyze}
             disabled={!selectedCell || currentLevel >= MAX_LEVEL}
-            className={`p-2 rounded-lg border px-4 flex flex-row justify-center items-center gap-3 ${!selectedCell || currentLevel >= MAX_LEVEL
+            className={`p-2 rounded-lg border px-4 flex flex-row justify-center items-center gap-3 ${
+              !selectedCell || currentLevel >= MAX_LEVEL
                 ? "bg-gray-400 text-gray-200 border-gray-300 cursor-pointer"
                 : "bg-gray-900 text-white border-gray-800 font-semibold"
-              }`}>
+            }`}
+          >
             <Command className="h-4 w-4 mr-2" />
             Analyze
           </button>
@@ -433,6 +449,5 @@ export default function AnalysisDashboard() {
         />
       )}
     </div>
-  )
+  );
 }
-
